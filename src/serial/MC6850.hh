@@ -79,7 +79,7 @@ private:
 
 	MidiOutConnector outConnector;
 };
-SERIALIZE_CLASS_VERSION(MC6850, 1);
+SERIALIZE_CLASS_VERSION(MC6850, 3);
 
 } // namespace openmsx
 

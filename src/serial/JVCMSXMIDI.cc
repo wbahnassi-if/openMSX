@@ -73,6 +73,7 @@ void JVCMSXMIDI::writeIO(word port, byte value, EmuTime::param time)
 template<typename Archive>
 void JVCMSXMIDI::serialize(Archive& ar, unsigned /*version*/)
 {
+	ar.template serializeBase<MSXDevice>(*this);
 	ar.serialize("MC6850", mc6850);
 }
 INSTANTIATE_SERIALIZE_METHODS(JVCMSXMIDI);

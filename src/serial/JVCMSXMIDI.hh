@@ -3,7 +3,6 @@
 
 #include "MSXDevice.hh"
 #include "MC6850.hh"
-#include "serialize_meta.hh"
 
 namespace openmsx {
 
@@ -24,7 +23,6 @@ public:
 private:
 	MC6850 mc6850;
 };
-SERIALIZE_CLASS_VERSION(JVCMSXMIDI, 1);
 
 } // namespace openmsx
 

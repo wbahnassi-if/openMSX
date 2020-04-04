@@ -24,7 +24,7 @@ public:
 private:
 	MC6850 mc6850;
 };
-SERIALIZE_CLASS_VERSION(MusicModuleMIDI, 1);
+SERIALIZE_CLASS_VERSION(MusicModuleMIDI, 4);
 
 } // namespace openmsx
 

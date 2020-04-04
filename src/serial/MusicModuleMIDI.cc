@@ -73,13 +73,26 @@ void MusicModuleMIDI::writeIO(word port, byte value, EmuTime::param time)
 	}
 }
 
-// version 1: initial version
+// versions 1-3: were for type "MC6850", see that class for details
+// version 4: first version for "MusicModuleMIDI"
 template<typename Archive>
 void MusicModuleMIDI::serialize(Archive& ar, unsigned version)
 {
-	ar.serialize("MC6850", mc6850);
+	ar.template serializeBase<MSXDevice>(*this);
+	if (ar.versionAtLeast(version, 4)) {
+		ar.serialize("MC6850", mc6850);
+	} else {
+		// MC6850 members were serialized as direct children of the
+		// <device> tag, without an intermediate <MC6850> tag.
+		mc6850.serialize(ar, version);
+	}
 }
 INSTANTIATE_SERIALIZE_METHODS(MusicModuleMIDI);
 REGISTER_MSXDEVICE(MusicModuleMIDI, "MusicModuleMIDI");
+
+// For backwards compatility, also register this class with the old name (only
+// needed for loading from disk). Versions 1-3 use the old name "MC6850",
+// version 4 (and above) use the name "MusicModuleMIDI".
+static RegisterInitializerHelper<XmlInputArchive, MusicModuleMIDI> registerbwCompat("MC6850");
 
 } // namespace openmsx
