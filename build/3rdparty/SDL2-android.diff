@@ -1,0 +1,92 @@
+--- app/jni/src/Android.mk	2020-06-09 13:59:54.000000000 -0400
++++ app/jni/src/Android.mk	2020-06-10 20:38:13.000000000 -0400
+@@ -6,13 +6,13 @@
+ 
+ SDL_PATH := ../SDL
+ 
+ LOCAL_C_INCLUDES := $(LOCAL_PATH)/$(SDL_PATH)/include
+ 
+ # Add your application source files here...
+-LOCAL_SRC_FILES := YourSourceHere.c
++# LOCAL_SRC_FILES := YourSourceHere.c
+ 
+ LOCAL_SHARED_LIBRARIES := SDL2
+ 
+ LOCAL_LDLIBS := -lGLESv1_CM -lGLESv2 -llog
+ 
+ include $(BUILD_SHARED_LIBRARY)
+--- app/jni/Application.mk	2020-06-09 13:59:54.000000000 -0400
++++ app/jni/Application.mk	2020-06-10 20:38:13.000000000 -0400
+@@ -1,10 +1,11 @@
+ 
+ # Uncomment this if you're using STL in your project
+ # You can find more information here:
+ # https://developer.android.com/ndk/guides/cpp-support
+-# APP_STL := c++_shared
++APP_STL := c++_shared
+ 
+-APP_ABI := armeabi-v7a arm64-v8a x86 x86_64
++#APP_ABI := armeabi-v7a arm64-v8a x86 x86_64
++APP_ABI := armeabi-v7a
+ 
+ # Min runtime API level
+ APP_PLATFORM=android-16
+--- app/src/main/AndroidManifest.xml	2020-06-09 13:59:54.000000000 -0400
++++ app/src/main/AndroidManifest.xml	2020-06-12 17:06:16.000000000 -0400
+@@ -1,12 +1,12 @@
+ <?xml version="1.0" encoding="utf-8"?>
+ <!-- Replace com.test.game with the identifier of your game below, e.g.
+      com.gamemaker.game
+ -->
+ <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+-    package="org.libsdl.app"
++    package="org.openmsx.android.openmsx"
+     android:versionCode="1"
+     android:versionName="1.0"
+     android:installLocation="auto">
+ 
+     <!-- OpenGL ES 2.0 -->
+     <uses-feature android:glEsVersion="0x00020000" />
+@@ -63,13 +63,13 @@
+         android:hardwareAccelerated="true" >
+ 
+         <!-- Example of setting SDL hints from AndroidManifest.xml:
+         <meta-data android:name="SDL_ENV.SDL_ACCELEROMETER_AS_JOYSTICK" android:value="0"/>
+          -->
+      
+-        <activity android:name="SDLActivity"
++        <activity android:name="openMSXActivity"
+             android:label="@string/app_name"
+             android:alwaysRetainTaskState="true"
+             android:launchMode="singleInstance"
+             android:configChanges="orientation|uiMode|screenLayout|screenSize|smallestScreenSize|keyboard|keyboardHidden|navigation"
+             >
+             <intent-filter>
+--- app/build.gradle	2020-06-09 13:59:54.000000000 -0400
++++ app/build.gradle	2020-06-12 15:24:38.000000000 -0400
+@@ -8,22 +8,23 @@
+ }
+ 
+ android {
+     compileSdkVersion 26
+     defaultConfig {
+         if (buildAsApplication) {
+-            applicationId "org.libsdl.app"
++            applicationId "org.openmsx.android.openmsx"
+         }
+         minSdkVersion 16
+         targetSdkVersion 26
+         versionCode 1
+         versionName "1.0"
+         externalNativeBuild {
+             ndkBuild {
+                 arguments "APP_PLATFORM=android-16"
+-                abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
++                //abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
++				abiFilters 'armeabi-v7a'
+             }
+             // cmake {
+             //     arguments "-DANDROID_APP_PLATFORM=android-16", "-DANDROID_STL=c++_static"
+             //     // abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
+             //     abiFilters 'arm64-v8a'
+             // }

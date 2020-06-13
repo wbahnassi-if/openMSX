@@ -77,6 +77,13 @@ static void initializeSDL()
 
 static int main(int argc, char **argv)
 {
+#if PLATFORM_ANDROID
+	if (argc >= 2) {
+		ad_printf("Setting current directory to %s\n", argv[1]);
+		chdir(argv[1]);
+	}
+#endif
+
 #if LOG_TO_FILE
 	ad_printf("Redirecting stdout to %s and stderr to %s\n",
 	          STDOUT_LOG_FILE_NAME, STDERR_LOG_FILE_NAME);
