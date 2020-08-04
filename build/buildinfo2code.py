@@ -36,7 +36,7 @@ def iterBuildInfoHeader(targetPlatform, cpuName, flavour, installShareDir):
 		# At the moment, libsdl android crashes when trying to dynamically change the scale factor
 		# TODO: debug why it crashes and then change the maxScaleFactor parameter here
 		# so that people with a powerfull enough android device can use a higher scale factor
-		have32BPP = False
+		have32BPP = True
 		minScaleFactor = 2
 		maxScaleFactor = 2
 	elif platformPandora:

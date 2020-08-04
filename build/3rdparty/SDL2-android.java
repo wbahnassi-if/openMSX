@@ -9,9 +9,9 @@ import java.util.zip.*;
 
 public class openMSXActivity extends SDLActivity {
 	private static final String TAG = "openMSXActivity";
-	
-	@Override
-	protected String[] getLibraries() {
+
+    @Override
+    protected String[] getLibraries() {
         return new String[] {
             "hidapi",
             "SDL2",
@@ -20,13 +20,6 @@ public class openMSXActivity extends SDLActivity {
             // "SDL2_net",
             // "SDL2_ttf",
             "openmsx" // Keep this last so getMainSharedObject uses it as the main library
-        };
-    }
-	
-	@Override
-	protected String[] getArguments() {
-        return new String[] {
-            this.getFilesDir().getAbsolutePath()
         };
     }
 

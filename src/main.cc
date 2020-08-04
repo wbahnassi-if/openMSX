@@ -78,10 +78,7 @@ static void initializeSDL()
 static int main(int argc, char **argv)
 {
 #if PLATFORM_ANDROID
-	if (argc >= 2) {
-		ad_printf("Setting current directory to %s\n", argv[1]);
-		chdir(argv[1]);
-	}
+	chdir(SDL_AndroidGetInternalStoragePath()); // log file names and system files are based off this
 #endif
 
 #if LOG_TO_FILE
