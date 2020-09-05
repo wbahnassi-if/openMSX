@@ -275,6 +275,7 @@ void Reactor::init()
 
 	eventDistributor->registerEventListener(OPENMSX_QUIT_EVENT, *this);
 #if PLATFORM_ANDROID
+	block(); // Android receives a focus gain event upon launch, so mark as initially blocked
 	eventDistributor->registerEventListener(OPENMSX_FOCUS_EVENT, *this);
 #endif
 	eventDistributor->registerEventListener(OPENMSX_DELETE_BOARDS, *this);
