@@ -324,16 +324,6 @@ speed 120</code>, will let the emulated MSX run at 120% of normal MSX speed. Thi
 </p>
 
 <p>
-If you got the MSX sped up to maximum (<code>set <a class="external" href="commands.html#throttle">throttle</a></code>), but
-openMSX is still not going fast enough for you, you can increase the
-<code>maxframeskip</code> setting: <code>set <a class="external" href="commands.html#maxframeskip">maxframeskip</a> 10</code> will mean that openMSX may
-skip 10 screens to be displayed, just to get to the requested speed. Note that
-you can also <em>force</em> openMSX to skip frames, with the <code><a class="external" href="commands.html#minframeskip">minframeskip</a></code> setting. This
-sets the amount of frames that will be skipped always. Of course frame skipping
-makes emulation a lot less accurate.
-</p>
-
-<p>
 Some MSX machines like the Panasonic FS-A1GT have built in software (called firmware), that can be switched on and off via a switch on the machine itself. In openMSX the internal software is switched off by default, but you can switch it on with the following setting: <code>set <a class="external" href="commands.html#firmwareswitch">firmwareswitch</a> on</code>.
 </p>
 
@@ -820,7 +810,7 @@ The mapping of the keys for emulator functions is fully customisable using the <
   <tr> <td>PrtScr</td>     <td>Cmd+D (Dump)</td>       <td>Save current screen to a file (<a class="external" href="commands.html#screenshot">screen shot</a>)</td> </tr>
   <tr> <td>PageUp</td>         <td>PageUp</td>   <td>Go 1 second back in time, using the <a class="external" href="commands.html#reverse">reverse</a> feature</td> </tr>
   <tr> <td>PageDown</td>         <td>PageDown</td>   <td>Go 1 second forward in time, using the <a class="external" href="commands.html#reverse">reverse</a> feature</td> </tr>
-  <tr> <td>F9</td>         <td>Cmd+T (Throttle)</td>   <td>Toggle full <a class="external" href="commands.html#throttle">throttle</a> (maximum speed)</td> </tr>
+  <tr> <td>F9</td>         <td>Cmd+T (Fastforward)</td>   <td>Toggle <a class="external" href="commands.html#fastforward">fastforward</a> mode (normal vs fastforward speed)</td> </tr>
   <tr> <td>F10</td>        <td>Cmd+L (consoLe)</td>    <td>Toggle <a class="external" href="commands.html#console">console</a> display</td> </tr>
   <tr> <td>F11 or ALT+Enter</td> <td>Cmd+F (Full)</td> <td>Toggle <a class="external" href="commands.html#fullscreen">full screen</a> mode</td> </tr>
   <tr> <td>F12</td>        <td>Cmd+U (mUte)</td>       <td>Toggle <a class="external" href="commands.html#mute">audio mute</a></td> </tr>
