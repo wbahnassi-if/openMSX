@@ -40,7 +40,7 @@ Display::Display(Reactor& reactor_)
 	: RTSchedulable(reactor_.getRTScheduler())
 	, screenShotCmd(reactor_.getCommandController())
 	, fpsInfo(reactor_.getOpenMSXInfoCommand())
-	, osdGui(reactor_.getCommandController(), *this)
+	, osdGui(reactor_.getCommandController(), *this, reactor_.getEventDistributor())
 	, reactor(reactor_)
 	, renderSettings(reactor.getCommandController())
 	, commandConsole(reactor.getGlobalCommandController(),

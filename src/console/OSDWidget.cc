@@ -387,6 +387,11 @@ vec2 OSDWidget::transformPos(const OutputSurface& output,
 	return out;
 }
 
+gl::ivec2 OSDWidget::getMouseCoordUnscaled() const
+{
+	return getParent() ? getParent()->getMouseCoordUnscaled() : ivec2(0,0);
+}
+
 vec2 OSDWidget::transformReverse(const OutputSurface& output, vec2 trPos) const
 {
 	if (const auto* p = getParent()) {
@@ -426,10 +431,9 @@ vec2 OSDWidget::getMouseCoord() const
 			"Can't get mouse coordinates: no window visible");
 	}
 
-	int mouseX, mouseY;
-	SDL_GetMouseState(&mouseX, &mouseY);
+	ivec2 mouseXY = getMouseCoordUnscaled();
 
-	vec2 out = transformReverse(*output, vec2(mouseX, mouseY));
+	vec2 out = transformReverse(*output, vec2(mouseXY[0], mouseXY[1]));
 
 	vec2 size = getSize(*output);
 	if ((size[0] == 0.0f) || (size[1] == 0.0f)) {

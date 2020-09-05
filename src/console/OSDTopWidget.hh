@@ -3,6 +3,8 @@
 
 #include "OSDWidget.hh"
 #include "TclObject.hh"
+#include "EventDistributor.hh"
+#include "EventListener.hh"
 #include "hash_set.hh"
 #include "xxhash.hh"
 #include <vector>
@@ -10,10 +12,12 @@
 
 namespace openmsx {
 
-class OSDTopWidget final : public OSDWidget
+class OSDTopWidget final : public OSDWidget, private EventListener
 {
 public:
-	explicit OSDTopWidget(Display& display);
+	explicit OSDTopWidget(Display& display, EventDistributor& eventDistributor);
+	virtual ~OSDTopWidget();
+
 	std::string_view getType() const override;
 	gl::vec2 getSize(const OutputSurface& output) const override;
 
@@ -30,8 +34,13 @@ protected:
 	void invalidateLocal() override;
 	void paintSDL(OutputSurface& output) override;
 	void paintGL (OutputSurface& output) override;
+	gl::ivec2 getMouseCoordUnscaled() const override { return gl::ivec2(mouseCachedX,mouseCachedY); }
 
 private:
+	int signalEvent(const std::shared_ptr<const Event>& event) override;
+	int mouseCachedX,mouseCachedY;
+
+	EventDistributor& eventDistributor;
 	std::vector<std::string> errors;
 
 	struct NameFromWidget {

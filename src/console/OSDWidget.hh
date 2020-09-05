@@ -58,6 +58,7 @@ protected:
 	virtual void invalidateLocal() = 0;
 	virtual void paintSDL(OutputSurface& output) = 0;
 	virtual void paintGL (OutputSurface& output) = 0;
+	virtual gl::ivec2 getMouseCoordUnscaled() const;
 
 private:
 	gl::vec2 getMouseCoord() const;

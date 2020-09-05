@@ -20,10 +20,10 @@ namespace openmsx {
 
 // class OSDGUI
 
-OSDGUI::OSDGUI(CommandController& commandController, Display& display_)
+OSDGUI::OSDGUI(CommandController& commandController, Display& display_, EventDistributor& eventDistributer)
 	: display(display_)
 	, osdCommand(commandController)
-	, topWidget(display_)
+	, topWidget(display_, eventDistributer)
 {
 }
 

@@ -13,7 +13,7 @@ class CommandController;
 class OSDGUI
 {
 public:
-	OSDGUI(CommandController& commandController, Display& display);
+	OSDGUI(CommandController& commandController, Display& display, EventDistributor& eventDistributer);
 
 	Display& getDisplay() const { return display; }
 	const OSDTopWidget& getTopWidget() const { return topWidget; }

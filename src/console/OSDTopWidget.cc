@@ -2,14 +2,25 @@
 #include "OutputSurface.hh"
 #include "Display.hh"
 #include "CliComm.hh"
+#include "EventDistributor.hh"
+#include "InputEvents.hh"
 #include "view.hh"
+#include "checked_cast.hh"
 
 namespace openmsx {
 
-OSDTopWidget::OSDTopWidget(Display& display_)
-	: OSDWidget(display_, TclObject())
+OSDTopWidget::OSDTopWidget(Display& display_, EventDistributor& eventDistributor_)
+	: OSDWidget(display_, TclObject()),
+	  mouseCachedX(0),mouseCachedY(0),
+	  eventDistributor(eventDistributor_)
 {
 	addName(*this);
+	eventDistributor.registerEventListener(OPENMSX_MOUSE_MOTION_EVENT,*this,EventDistributor::CONSOLE);
+}
+
+OSDTopWidget::~OSDTopWidget()
+{
+	eventDistributor.unregisterEventListener(OPENMSX_MOUSE_MOTION_EVENT,*this);
 }
 
 std::string_view OSDTopWidget::getType() const
@@ -35,6 +46,14 @@ void OSDTopWidget::paintSDL(OutputSurface& /*output*/)
 void OSDTopWidget::paintGL (OutputSurface& /*output*/)
 {
 	// nothing
+}
+
+int OSDTopWidget::signalEvent(const std::shared_ptr<const Event>& event)
+{
+	auto& mme = checked_cast<const MouseMotionEvent&>(*event);
+	mouseCachedX = mme.getAbsX();
+	mouseCachedY = mme.getAbsY();
+	return 0;
 }
 
 void OSDTopWidget::queueError(std::string message)
