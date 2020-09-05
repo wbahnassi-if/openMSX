@@ -17,6 +17,9 @@ TODO:
 #include "EventDistributor.hh"
 #include "FinishFrameEvent.hh"
 #include "RealTime.hh"
+#include "SpeedManager.hh"
+#include "ThrottleManager.hh"
+#include "GlobalSettings.hh"
 #include "MSXMotherBoard.hh"
 #include "Reactor.hh"
 #include "Timer.hh"
@@ -24,6 +27,7 @@ TODO:
 #include "unreachable.hh"
 #include <algorithm>
 #include <cassert>
+#include <cmath>
 
 namespace openmsx {
 
@@ -109,6 +113,10 @@ PixelRenderer::PixelRenderer(VDP& vdp_, Display& display)
 	: vdp(vdp_), vram(vdp.getVRAM())
 	, eventDistributor(vdp.getReactor().getEventDistributor())
 	, realTime(vdp.getMotherBoard().getRealTime())
+	, speedManager(
+		vdp.getReactor().getGlobalSettings().getSpeedManager())
+	, throttleManager(
+		vdp.getReactor().getGlobalSettings().getThrottleManager())
 	, renderSettings(display.getRenderSettings())
 	, videoSourceSetting(vdp.getMotherBoard().getVideoSource())
 	, spriteChecker(vdp.getSpriteChecker())
@@ -162,33 +170,42 @@ void PixelRenderer::frameStart(EmuTime::param time)
 		frameSkipCounter = 999;
 		renderFrame = false;
 		prevRenderFrame = false;
+		paintFrame = false;
 		return;
 	}
+
 	prevRenderFrame = renderFrame;
-	if (vdp.isInterlaced() && renderSettings.getDeinterlace() &&
-	    vdp.getEvenOdd() && vdp.isEvenOddEnabled()) {
-		// deinterlaced odd frame, do same as even frame
-	} else {
-		if (frameSkipCounter < renderSettings.getMinFrameSkip()) {
-			++frameSkipCounter;
-			renderFrame = false;
-		} else if (frameSkipCounter >= renderSettings.getMaxFrameSkip()) {
-			frameSkipCounter = 0;
-			renderFrame = true;
+	if (vdp.isInterlaced() && renderSettings.getDeinterlace()
+			&& vdp.getEvenOdd() && vdp.isEvenOddEnabled()) {
+		// Deinterlaced odd frame: do same as even frame.
+		paintFrame = prevRenderFrame;
+	} else if (throttleManager.isThrottled()) {
+		// Note: min/maxFrameSkip control the number of skipped frames, but
+		//       for every series of skipped frames there is also one painted
+		//       frame, so our boundary checks are offset by one.
+		int counter = int(frameSkipCounter);
+		if (counter < renderSettings.getMinFrameSkip()) {
+			paintFrame = false;
+		} else if (counter > renderSettings.getMaxFrameSkip()) {
+			paintFrame = true;
 		} else {
-			++frameSkipCounter;
-			if (rasterizer->isRecording()) {
-				renderFrame = true;
-			} else {
-				renderFrame = realTime.timeLeft(
-					unsigned(finishFrameDuration), time);
-			}
-			if (renderFrame) {
-				frameSkipCounter = 0;
-			}
+			paintFrame = realTime.timeLeft(
+				unsigned(finishFrameDuration), time);
 		}
+		frameSkipCounter += 1.0f / float(speedManager.getSpeed());
+	} else  {
+		// We need to render a frame every now and then,
+		// to show the user what is happening.
+		paintFrame = (Timer::getTime() - lastPaintTime) >= 100000; // 10 fps
 	}
-	if (!renderFrame) return;
+
+	if (paintFrame) {
+		frameSkipCounter = std::remainder(frameSkipCounter, 1.0f);
+	} else if (!rasterizer->isRecording()) {
+		renderFrame = false;
+		return;
+	}
+	renderFrame = true;
 
 	rasterizer->frameStart(time);
 
@@ -203,7 +220,6 @@ void PixelRenderer::frameStart(EmuTime::param time)
 
 void PixelRenderer::frameEnd(EmuTime::param time)
 {
-	bool skipEvent = !renderFrame;
 	if (renderFrame) {
 		// Render changes from this last frame.
 		sync(time, true);
@@ -217,12 +233,14 @@ void PixelRenderer::frameEnd(EmuTime::param time)
 		finishFrameDuration = finishFrameDuration * (1 - ALPHA) +
 		                      current * ALPHA;
 
-		if (vdp.isInterlaced() && vdp.isEvenOddEnabled() &&
-		    renderSettings.getDeinterlace() &&
-		    !prevRenderFrame) {
-			// dont send event in deinterlace mode when
-			// previous frame was not rendered
-			skipEvent = true;
+		if (vdp.isInterlaced() && vdp.isEvenOddEnabled()
+				&& renderSettings.getDeinterlace() && !prevRenderFrame) {
+			// Don't paint in deinterlace mode when previous frame
+			// was not rendered.
+			paintFrame = false;
+		}
+		if (paintFrame) {
+			lastPaintTime = time2;
 		}
 	}
 	if (vdp.getMotherBoard().isActive() &&
@@ -231,7 +249,7 @@ void PixelRenderer::frameEnd(EmuTime::param time)
 			std::make_shared<FinishFrameEvent>(
 				rasterizer->getPostProcessor()->getVideoSource(),
 				videoSourceSetting.getSource(),
-				skipEvent));
+				!paintFrame));
 	}
 }
 

@@ -110,6 +110,8 @@
         <li><a class="internal" href="#display_deform">display_deform</a></li>
         <li><a class="internal" href="#di_halt_callback">di_halt_callback</a></li>
         <li><a class="internal" href="#enable_session_management">enable_session_management</a></li>
+        <li><a class="internal" href="#fastforward">fastforward</a></li>
+        <li><a class="internal" href="#fastforwardspeed">fastforwardspeed</a></li>
         <li><a class="internal" href="#frequency">frequency</a></li>
         <li><a class="internal" href="#firmwareswitch">firmwareswitch</a></li>
         <li><a class="internal" href="#fullscreen">fullscreen</a></li>
@@ -399,10 +401,10 @@
     <code>bind PAGEUP   "set speed 100"</code><br />
     <code>bind PAGEDOWN "set speed  50"</code><br />
     <br />
-    Only run with full throttle while F9 is pressed (like BrMSX):<br />
+    Only run in fastforward-mode while F9 is pressed (like BrMSX):<br />
     <code>unbind F9</code><br />
-    <code>bind F9         "set throttle off"</code><br />
-    <code>bind F9,release "set throttle on"</code><br />
+    <code>bind F9         "set fastforward off"</code><br />
+    <code>bind F9,release "set fastforward on"</code><br />
     <br />
     Pause when window loses focus (like fMSX):<br />
     <code>bind "focus 0" "set pause on"</code><br />
@@ -3479,6 +3481,56 @@
   <p>Sessions can also be saved manually with the command <code>save_session</code>, and explicitly loaded with <code>load_session</code>. A list of saved sessions can be retrieved with <code>list_sessions</code>.
   </p>
 
+  <h3><a id="fastforward">fastforward</a></h3>
+
+  <p>Chooses between normal speed (off) and fastforward speed (on).</p>
+
+  <div class="subsectiontitle">
+    usage:
+  </div>
+
+  <table>
+    <tr>
+      <td><code>set fastforward</code></td>
+
+      <td>Shows the current setting</td>
+    </tr>
+
+    <tr>
+      <td><code>set fastforward on</code></td>
+
+      <td>Run at fastforward speed: the <code><a class="internal" href="#fastforwardspeed">fastforwardspeed</a></code> setting determines how fast the emulated MSX runs compared to real time</td>
+    </tr>
+
+    <tr>
+      <td><code>set fastforward off</code></td>
+
+      <td>Run at normal speed: the <code><a class="internal" href="#speed">speed</a></code> setting determines how fast the emulated MSX runs compared to real time</td>
+    </tr>
+  </table>
+
+  <h3><a id="fastforwardspeed">fastforwardspeed</a></h3>
+
+  <p>Sets the emulation speed relative to the speed of a real MSX when we are running in <a class="internal" href="#fastforward">fastforward mode</a>. Speed 100 means as fast as a real MSX, lower values are slower than real MSX, higher values are faster than real MSX.</p>
+
+  <div class="subsectiontitle">
+    usage:
+  </div>
+
+  <table>
+    <tr>
+      <td><code>set fastforwardspeed</code></td>
+
+      <td>Shows current fastforward speed</td>
+    </tr>
+
+    <tr>
+      <td><code>set fastforwardspeed &lt;num&gt;</code></td>
+
+      <td>Sets new fastforward speed to &lt;num&gt;% of real time</td>
+    </tr>
+  </table>
+
   <h3><a id="frequency">frequency</a></h3>
 
   <p>Sets the sound mixer frequency. Sound hardware and sound APIs typically support a limited set of frequencies, such as 11025 Hz, 22050 Hz, 44100 Hz and 48000 Hz.</p>
@@ -4332,8 +4384,6 @@
 
   <p>In a situation where the number of consecutive frames specified by <code>maxframeskip</code> has been skipped, openMSX will display the next frame, even if that means emulation will start lagging behind real time.</p>
 
-  <p>When <code><a class="internal" href="#throttle">throttle</a></code> is off, the number of skipped frames will be equal to <code>maxframeskip</code>.</p>
-
   <div class="subsectiontitle">
     usage:
   </div>
@@ -5041,7 +5091,7 @@
     <tr>
       <td><code>set speed &lt;num&gt;</code></td>
 
-      <td>Sets new emulation speed</td>
+      <td>Sets new emulation speed to &lt;num&gt;% of real time</td>
     </tr>
   </table>
 
@@ -5361,7 +5411,7 @@
 
   <h3><a id="throttle">throttle</a></h3>
 
-  <p>Sets throttle mode. In throttle mode the emulator tries to run at the specified speed relative to a real MSX (see <a class="internal" href="#speed">speed</a> command). When throttling is turned off the emulator runs as fast as possible. The speed may be limited to the framerate of your monitor (e.g. 60fps) if you have set <a class="internal" href="vsync">vsync</a> enabled, when using the (default) SDLGL-PP renderer. In that case, to increase the speed, set the <a class="internal" href="#maxframeskip">maxframeskip</a> setting to a high value (e.g. 100).</p>
+  <p>Sets throttle mode. In throttle mode the emulator tries to run at the specified speed relative to a real MSX (see <a class="internal" href="#speed">speed</a> command). When throttling is turned off the emulator runs as fast as possible.</p>
 
   <div class="subsectiontitle">
     usage:
@@ -5495,7 +5545,6 @@
   </div>
 -->
 
-
   <h3><a id="turborpause">turborpause</a></h3>
 
   <p>Controls the pause key on a MSX turboR machine.</p>
@@ -5527,7 +5576,6 @@
   <div class="note">
     Note: If you use this setting often, it may be useful to bind it to a key on your PC keyboard. See the <code><a class="internal" href="#bind">bind</a></code> and <code><a class="internal" href="#toggle">toggle</a></code> commands.
   </div>
-
 
   <h3><a id="umr_callback">umr_callback</a></h3>
 
@@ -5641,7 +5689,7 @@
 
   <p>Enables or disables vsync. This setting determines whether the SDLGL-PP renderer should synchronize its frames to your host monitors frame rate (e.g. 60fps).</p>
   <p>The default value is not to synchronize ("<code>off</code>"). When enabled, adaptive vsync is attempted if your hardware and driver support it, which means that if a frame is too late, it will be output immediately anyway. If not supported, normal vsync will be used, which may mean a frame is output later, when the sync is missed.</p>
-  <p>Enable this if your MSX is running at about the same frame rate as your monitor (e.g. 60Hz MSX output on a 60Hz host monitor) and you want to avoid (or reduce) tearing, which can be quite visible in smooth horizontal scrolling demos. Keep in mind <a class="internal" href="throttle">throttle mode</a> off works a bit differently if vsync is enabled (see there).</p>
+  <p>Enable this if your MSX is running at about the same frame rate as your monitor (e.g. 60Hz MSX output on a 60Hz host monitor) and you want to avoid (or reduce) tearing, which can be quite visible in smooth horizontal scrolling demos. Keep in mind <a class="internal" href="#throttle">throttle mode</a> off works a bit differently if vsync is enabled (see there).</p>
 
   <div class="subsectiontitle">
     usage:
@@ -5657,13 +5705,13 @@
     <tr>
       <td><code>set vsync off</code></td>
 
-      <td>No synchronization to monitor frame rate: draw immediately (default)</td>
+      <td>No synchronization to monitor frame rate: draw immediately</td>
     </tr>
 
     <tr>
       <td><code>set vsync on</code></td>
 
-      <td>Synchronize to monitor frame rate when possible, otherwise draw immediately. Or, when this is not available on the host hardware/driver, synchronize to monitor frame rate always</td>
+      <td>Synchronize to monitor frame rate when possible, otherwise draw immediately. Or, when this is not available on the host hardware/driver, synchronize to monitor frame rate always (default)</td>
     </tr>
 
   </table>
