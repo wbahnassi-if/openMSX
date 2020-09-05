@@ -101,6 +101,11 @@ Interpreter::Interpreter()
 	            TclObject(FileOperations::getUserDataDir()));
 	setVariable(TclObject("env(OPENMSX_SYSTEM_DATA)"),
 	            TclObject(FileOperations::getSystemDataDir()));
+	#if PLATFORM_ANDROID
+	// Android doesn't have a HOME, use user data folder instead
+	setVariable(TclObject("env(HOME)"),
+	            TclObject(FileOperations::getUserDataDir()));
+	#endif // PLATFORM_ANDROID
 }
 
 Interpreter::~Interpreter()
