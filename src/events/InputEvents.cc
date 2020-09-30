@@ -273,6 +273,62 @@ bool JoystickHatEvent::lessImpl(const JoystickEvent& other) const
 }
 
 
+// class TouchEvent
+TouchEvent::TouchEvent(EventType type, unsigned finger_, int xabs_, int yabs_)
+	: TimedEvent(type), finger(finger_), xabs(xabs_), yabs(yabs_)
+{
+}
+
+bool TouchEvent::lessImpl(const Event& other) const
+{
+	auto& o = checked_cast<const TouchEvent&>(other);
+	return std::tuple(  getAbsX(),   getAbsY()) <
+	       std::tuple(o.getAbsX(), o.getAbsY());
+}
+
+// class TouchUpEvent
+TouchUpEvent::TouchUpEvent(unsigned finger_, int xabs_, int yabs_)
+	: TouchEvent(OPENMSX_TOUCH_UP_EVENT, finger_, xabs_, yabs_)
+{
+}
+
+TclObject TouchUpEvent::toTclList() const
+{
+	return makeTclList("touch", "up", getFinger(), getAbsX(), getAbsY());
+}
+
+
+// class TouchDownEvent
+TouchDownEvent::TouchDownEvent(unsigned finger_, int xabs_, int yabs_)
+	: TouchEvent(OPENMSX_TOUCH_DOWN_EVENT, finger_, xabs_, yabs_)
+{
+}
+
+TclObject TouchDownEvent::toTclList() const
+{
+	return makeTclList("touch", "down", getFinger(), getAbsX(), getAbsY());
+}
+
+
+// class TouchMotionEvent
+TouchMotionEvent::TouchMotionEvent(unsigned finger_, int xrel_, int yrel_, int xabs_, int yabs_)
+	: TouchEvent(OPENMSX_TOUCH_MOTION_EVENT, finger_, xabs_, yabs_), xrel(xrel_), yrel(yrel_)
+{
+}
+
+TclObject TouchMotionEvent::toTclList() const
+{
+	return makeTclList("touch", "motion", getFinger(), getX(), getY(), getAbsX(), getAbsY());
+}
+
+bool TouchMotionEvent::lessImpl(const Event& other) const
+{
+	auto& o = checked_cast<const TouchMotionEvent&>(other);
+	return std::tuple(  getX(),   getY(),   getAbsX(),   getAbsY()) <
+	       std::tuple(o.getX(), o.getY(), o.getAbsX(), o.getAbsY());
+}
+
+
 // class FocusEvent
 
 FocusEvent::FocusEvent(bool gain_)

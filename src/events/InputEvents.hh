@@ -211,6 +211,56 @@ private:
 };
 
 
+class TouchEvent : public TimedEvent
+{
+public:
+	// Fingers are indexed from 0 and upwards. The order represents
+	// which finger came first, not the order of human fingers.
+	// The index refers to the same finger as long as it maintains the touch.
+	unsigned getFinger() const { return finger; }
+	int getAbsX() const { return xabs; }
+	int getAbsY() const { return yabs; }
+
+protected:
+	TouchEvent(EventType type, unsigned finger_, int xabs_, int yabs_);
+	~TouchEvent() = default;
+
+private:
+	bool lessImpl(const Event& other) const override;
+	const unsigned finger;
+	const int xabs;
+	const int yabs;
+};
+
+class TouchUpEvent final : public TouchEvent
+{
+public:
+	explicit TouchUpEvent(unsigned finger_, int xabs_, int yabs_);
+	TclObject toTclList() const override;
+};
+
+class TouchDownEvent final : public TouchEvent
+{
+public:
+	explicit TouchDownEvent(unsigned finger_, int xabs_, int yabs_);
+	TclObject toTclList() const override;
+};
+
+class TouchMotionEvent final : public TouchEvent
+{
+public:
+	TouchMotionEvent(unsigned finger_, int xrel_, int yrel_, int xabs_, int yabs_);
+	int getX() const    { return xrel; }
+	int getY() const    { return yrel; }
+	TclObject toTclList() const override;
+
+private:
+	bool lessImpl(const Event& other) const override;
+	const int xrel;
+	const int yrel;
+};
+
+
 class FocusEvent final : public Event
 {
 public:

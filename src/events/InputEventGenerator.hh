@@ -71,6 +71,14 @@ private:
 		ESCAPE_GRAB_WAIT_GAIN
 	} escapeGrabState;
 
+	// Touch
+	static const unsigned maxTouchFingers = 5;
+	static const unsigned invalidFingerIndex = unsigned(-1);
+	unsigned fingers[maxTouchFingers] = {}; // Tracked finger IDs
+	unsigned fingerTrackStart(unsigned fingerID);
+	unsigned fingerTrackEnd(unsigned fingerID);
+	unsigned fingerFindIndex(unsigned fingerID) const;
+
 	// OsdControl
 	void setNewOsdControlButtonState(
 		unsigned newState, const EventPtr& origEvent);

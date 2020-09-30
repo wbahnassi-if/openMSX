@@ -35,6 +35,9 @@ InputEventGenerator::InputEventGenerator(CommandController& commandController,
 	setGrabInput(grabInput.getBoolean());
 	eventDistributor.registerEventListener(OPENMSX_FOCUS_EVENT, *this);
 
+	for (unsigned i=0; i<maxTouchFingers; i++)
+		fingers[i] = invalidFingerIndex;
+
 	osdControlButtonsState = unsigned(~0); // 0 is pressed, 1 is released
 
 #ifndef SDL_JOYSTICK_DISABLED
@@ -120,6 +123,38 @@ void InputEventGenerator::poll()
 	if (pending) {
 		handle(*prev);
 	}
+}
+
+unsigned InputEventGenerator::fingerTrackStart(unsigned fingerID)
+{
+	unsigned fingerIndex = fingerFindIndex(fingerID);
+	if (fingerIndex != invalidFingerIndex)
+		return fingerIndex; // Shouldn't happen generally, same finger registering more than once
+
+	// Try to allocate a new finger if available, otherwise we could've reached the maximum
+	fingerIndex = fingerFindIndex(invalidFingerIndex);
+	if (fingerIndex != invalidFingerIndex)
+		fingers[fingerIndex] = fingerID;
+	return fingerIndex;
+}
+
+unsigned InputEventGenerator::fingerTrackEnd(unsigned fingerID)
+{
+	unsigned fingerIndex = fingerFindIndex(fingerID);
+	if (fingerIndex != invalidFingerIndex)
+		fingers[fingerIndex] = invalidFingerIndex;
+	return fingerIndex;
+}
+
+unsigned InputEventGenerator::fingerFindIndex(unsigned fingerID) const
+{
+	// This can be replaced with a map if maxTouchFingers becomes larger than a single digit value
+	for (unsigned i=0; i<maxTouchFingers; i++)
+	{
+		if (fingers[i] == fingerID)
+			return i;
+	}
+	return invalidFingerIndex;
 }
 
 void InputEventGenerator::setNewOsdControlButtonState(
@@ -369,6 +404,28 @@ void InputEventGenerator::handle(const SDL_Event& evt)
 			evt.jhat.which, evt.jhat.hat, evt.jhat.value);
 		triggerOsdControlEventsFromJoystickHat(evt.jhat.value, event);
 		break;
+
+	case SDL_FINGERDOWN: {
+		unsigned fingerIndex = fingerTrackStart(evt.tfinger.fingerId);
+		if (fingerIndex != invalidFingerIndex) {
+			int w,h;
+			SDL_GetWindowSize(SDL_GetWindowFromID(evt.tfinger.windowID),&w,&h);
+			event = make_shared<TouchDownEvent>(fingerIndex, evt.tfinger.x*(float)w, evt.tfinger.y*(float)h);
+		}
+		break;
+	}
+    case SDL_FINGERUP: {
+		unsigned fingerIndex = fingerTrackEnd(evt.tfinger.fingerId);
+		if (fingerIndex != invalidFingerIndex)
+			event = make_shared<TouchUpEvent>(fingerIndex, 0, 0);
+		break;
+	}
+    case SDL_FINGERMOTION: {
+		unsigned fingerIndex = fingerFindIndex(evt.tfinger.fingerId);
+		if (fingerIndex != invalidFingerIndex)
+			event = make_shared<TouchMotionEvent>(fingerIndex, 0, 0, 0, 0);
+		break;
+	}
 
 	case SDL_TEXTINPUT:
 		handleText(evt.text.text);
