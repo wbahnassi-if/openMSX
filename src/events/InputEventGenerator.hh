@@ -13,6 +13,7 @@ namespace openmsx {
 class CommandController;
 class EventDistributor;
 class GlobalSettings;
+class Reactor;
 
 class InputEventGenerator final : private EventListener
 {
@@ -20,7 +21,8 @@ public:
 	InputEventGenerator(const InputEventGenerator&) = delete;
 	InputEventGenerator& operator=(const InputEventGenerator&) = delete;
 
-	InputEventGenerator(CommandController& commandController,
+	InputEventGenerator(Reactor& reactor,
+						CommandController& commandController,
 	                    EventDistributor& eventDistributor,
 	                    GlobalSettings& globalSettings);
 	~InputEventGenerator();
@@ -55,6 +57,7 @@ private:
 	// EventListener
 	int signalEvent(const std::shared_ptr<const Event>& event) override;
 
+	Reactor& reactor;
 	EventDistributor& eventDistributor;
 	GlobalSettings& globalSettings;
 	BooleanSetting grabInput;

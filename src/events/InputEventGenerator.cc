@@ -5,6 +5,9 @@
 #include "GlobalSettings.hh"
 #include "Keys.hh"
 #include "FileOperations.hh"
+#include "Reactor.hh"
+#include "Display.hh"
+#include "OutputSurface.hh"
 #include "checked_cast.hh"
 #include "one_of.hh"
 #include "outer.hh"
@@ -20,10 +23,12 @@ using std::make_shared;
 
 namespace openmsx {
 
-InputEventGenerator::InputEventGenerator(CommandController& commandController,
+InputEventGenerator::InputEventGenerator(Reactor& reactor_,
+                                         CommandController& commandController,
                                          EventDistributor& eventDistributor_,
                                          GlobalSettings& globalSettings_)
-	: eventDistributor(eventDistributor_)
+	: reactor(reactor_)
+	, eventDistributor(eventDistributor_)
 	, globalSettings(globalSettings_)
 	, grabInput(
 		commandController, "grabinput",
@@ -155,6 +160,21 @@ unsigned InputEventGenerator::fingerFindIndex(unsigned fingerID) const
 			return i;
 	}
 	return invalidFingerIndex;
+}
+
+static bool fingerMapCoordinates(Reactor& reactor, const SDL_Event& event, gl::ivec2& absXY, gl::ivec2* relXY = nullptr)
+{
+	OutputSurface *surface = reactor.getDisplay().getOutputSurface();
+	if (!surface)
+		return false;
+	absXY[0] = int(event.tfinger.x*surface->getLogicalWidth());
+	absXY[1] = int(event.tfinger.y*surface->getLogicalHeight());
+	if (relXY)
+	{
+		(*relXY)[0] = int(event.tfinger.dx*surface->getLogicalWidth());
+		(*relXY)[1] = int(event.tfinger.dy*surface->getLogicalHeight());
+	}
+	return true;
 }
 
 void InputEventGenerator::setNewOsdControlButtonState(
@@ -406,24 +426,30 @@ void InputEventGenerator::handle(const SDL_Event& evt)
 		break;
 
 	case SDL_FINGERDOWN: {
-		unsigned fingerIndex = fingerTrackStart(evt.tfinger.fingerId);
-		if (fingerIndex != invalidFingerIndex) {
-			int w,h;
-			SDL_GetWindowSize(SDL_GetWindowFromID(evt.tfinger.windowID),&w,&h);
-			event = make_shared<TouchDownEvent>(fingerIndex, evt.tfinger.x*(float)w, evt.tfinger.y*(float)h);
+		gl::ivec2 absXY;
+		if (fingerMapCoordinates(reactor, evt, absXY)) {
+			unsigned fingerIndex = fingerTrackStart(evt.tfinger.fingerId);
+			if (fingerIndex != invalidFingerIndex)
+				event = make_shared<TouchDownEvent>(fingerIndex, absXY[0], absXY[1]);
 		}
 		break;
 	}
     case SDL_FINGERUP: {
-		unsigned fingerIndex = fingerTrackEnd(evt.tfinger.fingerId);
-		if (fingerIndex != invalidFingerIndex)
-			event = make_shared<TouchUpEvent>(fingerIndex, 0, 0);
+		gl::ivec2 absXY;
+		if (fingerMapCoordinates(reactor, evt, absXY)) {
+			unsigned fingerIndex = fingerTrackEnd(evt.tfinger.fingerId);
+			if (fingerIndex != invalidFingerIndex)
+				event = make_shared<TouchUpEvent>(fingerIndex, absXY[0], absXY[1]);
+		}
 		break;
 	}
     case SDL_FINGERMOTION: {
-		unsigned fingerIndex = fingerFindIndex(evt.tfinger.fingerId);
-		if (fingerIndex != invalidFingerIndex)
-			event = make_shared<TouchMotionEvent>(fingerIndex, 0, 0, 0, 0);
+		gl::ivec2 absXY, relXY;
+		if (fingerMapCoordinates(reactor, evt, absXY, &relXY)) {
+			unsigned fingerIndex = fingerFindIndex(evt.tfinger.fingerId);
+			if (fingerIndex != invalidFingerIndex)
+				event = make_shared<TouchMotionEvent>(fingerIndex, absXY[0], absXY[1], relXY[0], relXY[1]);
+		}
 		break;
 	}
 
