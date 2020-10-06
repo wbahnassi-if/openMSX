@@ -341,25 +341,7 @@ void InputEventGenerator::handle(const SDL_Event& evt)
 {
 	EventPtr event;
 	switch (evt.type) {
-	case SDL_KEYUP:
-		// Virtual joystick of SDL Android port does not have joystick
-		// buttons. It has however up to 6 virtual buttons that can be
-		// mapped to SDL keyboard events. Two of these virtual buttons
-		// will be mapped to keys SDLK_WORLD_93 and 94 and are
-		// interpeted here as joystick buttons (respectively button 0
-		// and 1).
-		// TODO Android code should be rewritten for SDL2
-		/*if (PLATFORM_ANDROID && evt.key.keysym.sym == SDLK_WORLD_93) {
-			event = make_shared<JoystickButtonUpEvent>(0, 0);
-			triggerOsdControlEventsFromJoystickButtonEvent(
-				0, true, event);
-			androidButtonA = false;
-		} else if (PLATFORM_ANDROID && evt.key.keysym.sym == SDLK_WORLD_94) {
-			event = make_shared<JoystickButtonUpEvent>(0, 1);
-			triggerOsdControlEventsFromJoystickButtonEvent(
-				1, true, event);
-			androidButtonB = false;
-		} else*/ {
+	case SDL_KEYUP: {
 			auto mod = normalizeModifier(evt.key.keysym.sym, evt.key.keysym.mod);
 			auto [keyCode, scanCode] = Keys::getCodes(
 				evt.key.keysym.sym, mod, evt.key.keysym.scancode, true);
@@ -542,30 +524,13 @@ void InputEventGenerator::setGrabInput(bool grab)
 	//SDL_SetWindowGrab(window, grab ? SDL_TRUE : SDL_FALSE);
 }
 
-
-// Wrap SDL joystick button functions to handle the 'fake' android joystick
-// buttons. The method InputEventGenerator::handle() already takes care of fake
-// events for the andoid joystick buttons, these two wrappers handle the direct
-// joystick button state queries.
 int InputEventGenerator::joystickNumButtons(SDL_Joystick* joystick)
 {
-	if (PLATFORM_ANDROID) {
-		return 2;
-	} else {
-		return SDL_JoystickNumButtons(joystick);
-	}
+	return SDL_JoystickNumButtons(joystick);
 }
 bool InputEventGenerator::joystickGetButton(SDL_Joystick* joystick, int button)
 {
-	if (PLATFORM_ANDROID) {
-		switch (button) {
-		case 0: return androidButtonA;
-		case 1: return androidButtonB;
-		default: UNREACHABLE; return false;
-		}
-	} else {
-		return SDL_JoystickGetButton(joystick, button) != 0;
-	}
+	return SDL_JoystickGetButton(joystick, button) != 0;
 }
 
 

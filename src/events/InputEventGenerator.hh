@@ -96,12 +96,7 @@ private:
 	void triggerOsdControlEventsFromKeyEvent(
 		Keys::KeyCode keyCode, bool up, bool repeat, const EventPtr& origEvent);
 
-
 	unsigned osdControlButtonsState; // 0 is pressed, 1 is released
-
-	// only for Android
-	static inline bool androidButtonA = false;
-	static inline bool androidButtonB = false;
 };
 
 } // namespace openmsx

@@ -63,6 +63,14 @@ static void initializeSDL()
 #ifndef NDEBUG
 	flags |= SDL_INIT_NOPARACHUTE;
 #endif
+
+	// We handle touch directly, no need for touch<->mouse emulation
+	SDL_SetHint(SDL_HINT_MOUSE_TOUCH_EVENTS,"0");
+	SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS,"0");
+
+	// Also don't want accelerometer acting as a joystick
+	SDL_SetHint(SDL_HINT_ACCELEROMETER_AS_JOYSTICK,"0");
+
 	if (SDL_Init(flags) < 0) {
 		throw FatalError("Couldn't init SDL: ", SDL_GetError());
 	}
